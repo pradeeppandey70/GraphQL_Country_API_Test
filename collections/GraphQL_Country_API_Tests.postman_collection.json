@@ -1,0 +1,235 @@
+{
+	"info": {
+		"_postman_id": "a88d3276-2094-47e5-bedd-b28db02bf804",
+		"name": "GraphQL_Country_API_Tests",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "49623051",
+		"_collection_link": "https://pradeeppandey70-6843500.postman.co/workspace/Pradeep-Pandey's-Workspace~7d0cf602-164f-46aa-8b6c-041ec113e3ed/collection/49623051-a88d3276-2094-47e5-bedd-b28db02bf804?action=share&source=collection_link&creator=49623051"
+	},
+	"item": [
+		{
+			"name": "positive",
+			"item": [
+				{
+					"name": "Get Country By Code",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\",function(){\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Country name is India\", function () {\r",
+									"    pm.expect(pm.response.json().data.country.name).to.eql(\"India\");\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Currency is INR\", function () {\r",
+									"    pm.expect(pm.response.json().data.country.currency).to.eql(\"INR\");\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Capital is New Delhi\", function () {\r",
+									"    pm.expect(pm.response.json().data.country.capital).to.eql(\"New Delhi\");\r",
+									"});\r",
+									"\r",
+									"pm.test(\"No graphQL errors\", function(){\r",
+									"    pm.expect(pm.response.json().errors).to.be.undefined;\r",
+									"});\r",
+									"\r",
+									"const schema = {\r",
+									"  \"type\": \"object\",\r",
+									"  \"properties\": {\r",
+									"    \"data\": {\r",
+									"      \"type\": \"object\"\r",
+									"    }\r",
+									"  },\r",
+									"  \"required\": [\"data\"]\r",
+									"};\r",
+									"\r",
+									"pm.test(\"Response schema valid\", function () {\r",
+									"    pm.response.to.have.jsonSchema(schema);\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"query\": \"query { country(code: \\\"IN\\\") { name capital currency } }\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}",
+							"host": [
+								"{{baseUrl}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Country Using Variables",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Country exists\", function () {pm.expect(pm.response.json().data.country).not.to.be.null;})"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"query\": \"query getCountry($code: ID!) { country(code: $code) { name capital } }\",\r\n  \"variables\": {\r\n    \"code\": \"US\"\r\n  }\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}",
+							"host": [
+								"{{baseUrl}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "negative",
+			"item": [
+				{
+					"name": "invalid_field",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Check for GraphQL validation error\", function () { pm.expect(pm.response.json().errors).to.exist;})"
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"query\": \"query { country(code: \\\"IN\\\") { population } }\"\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}",
+							"host": [
+								"{{baseUrl}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "New Request",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 (GraphQL standard)\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Country object should be null for invalid code\", function () {\r",
+									"    const response = pm.response.json();\r",
+									"    pm.expect(response.data.country).to.eql(null);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"No server crash for invalid input\", function () {\r",
+									"    pm.expect(pm.response.text()).to.not.include(\"Internal Server Error\");\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"query\": \"query GetCountryInvalidCode { country(code: \\\"ZZZ\\\") { name capital currency } }\"\r\n}\r\n"
+						},
+						"url": {
+							"raw": "{{baseUrl}}",
+							"host": [
+								"{{baseUrl}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
